@@ -1,0 +1,35 @@
+name:                opencl-bindings
+version:             0.1.0.0
+synopsis:            OpenCL bindings for Haskell
+license:             ISC
+license-file:        LICENSE
+author:              Mikko Juola
+maintainer:          mikko.juola+dev@iki.fi
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Data.OpenCL
+  build-depends:       aeson
+                      ,base >=4.7 && <5.0
+                      ,primitive
+                      ,transformers
+  hs-source-dirs:      src
+  ghc-options:         -Wall -fno-warn-name-shadowing -cpp -pgmPcpphs -optP--cpp
+  cpp-options:         --hashes
+  c-sources:           cbits/opencl.c
+  extra-libraries:     OpenCL
+  default-language:    Haskell2010
+
+executable cl-info
+  main-is:             Main.hs
+  build-depends:       aeson
+                      ,base >=4.7 && <5.0
+                      ,bytestring
+                      ,opencl-bindings
+                      ,yaml
+  hs-source-dirs:      exe
+  ghc-options:         -Wall -fno-warn-name-shadowing -threaded -rtsopts "-with-rtsopts=-A64m -N -n4m"
+  default-language:    Haskell2010
+
