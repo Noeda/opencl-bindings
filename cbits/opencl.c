@@ -1,3 +1,5 @@
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
 #ifdef __APPLE__
 #include "OpenCL/opencl.h"
 #else
@@ -8,6 +10,24 @@
     cl_uint cl_##prefix( void ) \
     { return CL_##prefix; }
 
+CONSTANT_FUN(INVALID_LINKER_OPTIONS)
+CONSTANT_FUN(LINK_PROGRAM_FAILURE)
+CONSTANT_FUN(INVALID_COMPILER_OPTIONS)
+CONSTANT_FUN(BUILD_PROGRAM_FAILURE)
+CONSTANT_FUN(COMPILE_PROGRAM_FAILURE)
+CONSTANT_FUN(PROGRAM_BUILD_LOG)
+CONSTANT_FUN(MAP_READ)
+CONSTANT_FUN(MAP_WRITE)
+CONSTANT_FUN(MAP_WRITE_INVALIDATE_REGION)
+CONSTANT_FUN(MEM_READ_WRITE)
+CONSTANT_FUN(MEM_READ_ONLY)
+CONSTANT_FUN(MEM_WRITE_ONLY)
+CONSTANT_FUN(MEM_USE_HOST_PTR)
+CONSTANT_FUN(MEM_ALLOC_HOST_PTR)
+CONSTANT_FUN(MEM_COPY_HOST_PTR)
+CONSTANT_FUN(MEM_HOST_WRITE_ONLY)
+CONSTANT_FUN(MEM_HOST_READ_ONLY)
+CONSTANT_FUN(MEM_HOST_NO_ACCESS)
 CONSTANT_FUN(EXEC_KERNEL);
 CONSTANT_FUN(EXEC_NATIVE_KERNEL);
 CONSTANT_FUN(READ_ONLY_CACHE);
@@ -201,5 +221,226 @@ cl_int get_platform_info( cl_platform_id platform
                             , param_sz
                             , out
                             , NULL );
+}
+
+void release_device( cl_device_id device )
+{
+    clReleaseDevice( device );
+}
+
+void retain_context( cl_context context )
+{
+    clRetainContext( context );
+}
+
+void release_context( cl_context context )
+{
+    clReleaseContext( context );
+}
+
+void retain_device( cl_device_id device )
+{
+    clRetainDevice( device );
+}
+
+void retain_command_queue( cl_command_queue queue )
+{
+    clRetainCommandQueue( queue );
+}
+
+void release_command_queue( cl_command_queue queue )
+{
+    clReleaseCommandQueue( queue );
+}
+
+void release_mem( cl_mem mem )
+{
+    clReleaseMemObject( mem );
+}
+
+void retain_mem( cl_mem mem )
+{
+    clRetainMemObject( mem );
+}
+
+void release_event( cl_event ev )
+{
+    clReleaseEvent( ev );
+}
+
+void release_program( cl_program program )
+{
+    clReleaseProgram( program );
+}
+
+void release_kernel( cl_kernel kernel )
+{
+    clReleaseKernel( kernel );
+}
+
+cl_int enqueue_range_kernel( cl_command_queue queue
+                           , cl_kernel kernel
+                           , cl_uint work_dim
+                           , const size_t* global_work_offset
+                           , const size_t* global_work_size
+                           , const size_t* local_work_size
+                           , cl_uint num_events
+                           , const cl_event* wait_list
+                           , cl_event* event )
+{
+    return clEnqueueNDRangeKernel( queue, kernel, work_dim, global_work_offset, global_work_size, local_work_size, num_events, wait_list, event );
+}
+
+cl_kernel create_kernel( cl_program program
+                       , const char* kernel_name
+                       , cl_int* errcode_ret )
+{
+    return clCreateKernel( program, kernel_name, errcode_ret );
+}
+
+cl_int set_kernel_arg( cl_kernel kernel
+                     , cl_uint arg_index
+                     , size_t arg_size
+                     , const void* arg_value )
+{
+    return clSetKernelArg( kernel, arg_index, arg_size, arg_value );
+}
+
+cl_program create_program_with_source( cl_context ctx
+                                     , cl_uint count
+                                     , const char** strings
+                                     , const size_t* lengths
+                                     , cl_int* errcode_ret )
+{
+    return clCreateProgramWithSource( ctx, count, strings, lengths, errcode_ret );
+}
+
+cl_int get_program_build_info( cl_program program
+                             , cl_device_id device
+                             , cl_program_build_info param_name
+                             , size_t param_size
+                             , void* param_value
+                             , size_t* param_value_size_ret )
+{
+    return clGetProgramBuildInfo( program, device, param_name, param_size, param_value, param_value_size_ret );
+
+}
+
+cl_int compile_program( cl_program program
+                      , cl_uint num_devices
+                      , const cl_device_id* device_list
+                      , const char* options
+                      , cl_uint num_input_headers
+                      , const cl_program* headers
+                      , const char** header_include_names
+                      , void (CL_CALLBACK *pfn_notify)(cl_program, void*)
+                      , void* user_data )
+{
+    return clCompileProgram( program
+                           , num_devices
+                           , device_list
+                           , options
+                           , num_input_headers
+                           , headers
+                           , header_include_names
+                           , pfn_notify
+                           , user_data );
+}
+
+cl_program link_program( cl_context context
+                       , cl_uint num_devices
+                       , const cl_device_id* device_list
+                       , const char* options
+                       , cl_uint num_input_programs
+                       , const cl_program* programs
+                       , void (CL_CALLBACK *pfn_notify)(cl_program, void*)
+                       , void* user_data
+                       , cl_int* errcode_ret )
+{
+    return clLinkProgram( context, num_devices, device_list, options, num_input_programs, programs, pfn_notify, user_data, errcode_ret );
+}
+
+cl_int create_sub_devices( cl_device_id device
+                         , const cl_device_partition_property* props
+                         , cl_uint num_devices
+                         , cl_device_id* out_devices
+                         , cl_uint* num_devices_ret )
+{
+    return clCreateSubDevices( device
+                             , props
+                             , num_devices
+                             , out_devices
+                             , num_devices_ret );
+}
+
+void* enqueue_map_buffer( cl_command_queue queue
+                        , cl_mem buffer
+                        , cl_bool blocking
+                        , cl_map_flags map_flags
+                        , size_t offset
+                        , size_t size
+                        , cl_uint num_events
+                        , const cl_event* events
+                        , cl_event* event
+                        , cl_int* err_code )
+{
+    return clEnqueueMapBuffer( queue
+                             , buffer
+                             , blocking
+                             , map_flags
+                             , offset
+                             , size
+                             , num_events
+                             , events
+                             , event
+                             , err_code );
+}
+
+cl_int enqueue_unmap_mem( cl_command_queue queue
+                        , cl_mem mem
+                        , void* ptr
+                        , cl_uint num_events_in_wait_list
+                        , const cl_event* events
+                        , cl_event* ev )
+{
+    return clEnqueueUnmapMemObject( queue
+                                  , mem
+                                  , ptr
+                                  , num_events_in_wait_list
+                                  , events
+                                  , ev );
+}
+
+cl_command_queue create_command_queue( cl_context context
+                                     , cl_device_id device
+                                     , cl_command_queue_properties props
+                                     , cl_int* ret_code )
+{
+    return clCreateCommandQueue( context, device, props, ret_code );
+}
+
+cl_context create_context( const cl_context_properties* props
+                         , cl_uint num_devices
+                         , const cl_device_id* devices
+                         , void CL_CALLBACK (*pfn_notify)
+                           (const char*, const void*, size_t, void*)
+                         , void* user_data
+                         , cl_int* errcode_ret )
+{
+    return clCreateContext( props, num_devices, devices, pfn_notify, user_data, errcode_ret );
+}
+
+cl_mem create_buffer( cl_context ctx
+                    , cl_mem_flags flags
+                    , size_t size
+                    , void* host_ptr
+                    , cl_int* err_ptr )
+{
+    return clCreateBuffer( ctx, flags, size, host_ptr, err_ptr );
+}
+
+cl_int wait_for_events( cl_uint num_events, const cl_event* events )
+{
+    return clWaitForEvents( num_events, events );
 }
 

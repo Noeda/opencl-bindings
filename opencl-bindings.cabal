@@ -11,24 +11,25 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Data.OpenCL
-  build-depends:       aeson
-                      ,base >=4.7 && <5.0
+  build-depends:       base >=4.7 && <5.0
+                      ,bytestring
+                      ,exceptions
                       ,primitive
                       ,transformers
+                      ,vector
   hs-source-dirs:      src
-  ghc-options:         -Wall -fno-warn-name-shadowing -cpp -pgmPcpphs -optP--cpp
-  cpp-options:         --hashes
+  ghc-options:         -Wall -fno-warn-name-shadowing -pgmPcpphs -optP--cpp
   c-sources:           cbits/opencl.c
   extra-libraries:     OpenCL
   default-language:    Haskell2010
 
 executable cl-info
   main-is:             Main.hs
-  build-depends:       aeson
-                      ,base >=4.7 && <5.0
+  buildable:           False
+  build-depends:       base >=4.7 && <5.0
                       ,bytestring
                       ,opencl-bindings
-                      ,yaml
+                      ,time
   hs-source-dirs:      exe
   ghc-options:         -Wall -fno-warn-name-shadowing -threaded -rtsopts "-with-rtsopts=-A64m -N -n4m"
   default-language:    Haskell2010
