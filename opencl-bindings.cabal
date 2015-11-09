@@ -1,6 +1,9 @@
 name:                opencl-bindings
 version:             0.1.0.0
 synopsis:            OpenCL bindings for Haskell
+description:         This is an OpenCL bindings library targeting OpenCL 1.2.
+                     It features garbage collection for OpenCL resources and
+                     OpenCL errors are thrown as exceptions.
 license:             ISC
 license-file:        LICENSE
 author:              Mikko Juola
@@ -11,6 +14,18 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Data.OpenCL
+                       Data.OpenCL.Buffer
+                       Data.OpenCL.CommandQueue
+                       Data.OpenCL.Context
+                       Data.OpenCL.Device
+                       Data.OpenCL.Exception
+                       Data.OpenCL.Event
+                       Data.OpenCL.Event.Internal
+                       Data.OpenCL.Kernel
+                       Data.OpenCL.Handle
+                       Data.OpenCL.Platform
+                       Data.OpenCL.Program
+                       Data.OpenCL.Raw
   build-depends:       base >=4.7 && <5.0
                       ,bytestring
                       ,exceptions
