@@ -107,9 +107,12 @@ makeDevice (CDeviceIDHandle did_handle) = do
   global_mem_cache_line_size <- get_field cl_DEVICE_GLOBAL_MEM_CACHELINE_SIZE
   global_mem_size <- get_field cl_DEVICE_GLOBAL_MEM_SIZE
 
-  half_fp_config <- onCLFailure (-30)
+  half_fp_config <- onCLFailure (-59)
+                    (onCLFailure (-30)
                       (get_field cl_DEVICE_HALF_FP_CONFIG)
-                      0
+                      0)
+                    0
+
   host_unified_memory <- get_bool cl_DEVICE_HOST_UNIFIED_MEMORY
   image_support <- get_bool cl_DEVICE_IMAGE_SUPPORT
   max_height_2d <- get_field cl_DEVICE_IMAGE2D_MAX_HEIGHT
