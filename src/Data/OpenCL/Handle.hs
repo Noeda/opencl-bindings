@@ -2,6 +2,7 @@
 --
 
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
 module Data.OpenCL.Handle
@@ -24,9 +25,16 @@ module Data.OpenCL.Handle
 import Control.Concurrent.MVar
 import Data.Data
 import Data.OpenCL.Raw
+import Data.Yaml
 import Data.Word
 import Foreign.C.Types
 import GHC.Generics
+
+instance ToJSON CSize where
+  toJSON sz = toJSON (fromIntegral sz :: Word64)
+
+instance FromJSON CSize where
+  parseJSON ob = (fromIntegral :: Word64 -> CSize) <$> parseJSON ob
 
 -- | Managed handle to OpenCL device.
 --
@@ -64,28 +72,28 @@ data DeviceType
   | Accelerator
   | Default
   | Custom
-  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum )
+  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum, ToJSON, FromJSON )
 
 -- | Supported partitioning types for the device.
 data PartitionType
   = Equally
   | ByCounts
   | ByAffinityDomain
-  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum )
+  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum, ToJSON, FromJSON )
 
 -- | What kind of memory is this.
 data MemType
   = Local
   | Global
   | NoMem
-  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum )
+  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum, ToJSON, FromJSON )
 
 -- | Cache type.
 data CacheType
   = NoCache
   | ReadCache
   | ReadWriteCache
-  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum )
+  deriving ( Eq, Ord, Show, Read, Typeable, Data, Generic, Enum, ToJSON, FromJSON )
 
 -- | Device caps. This record can be used to inspect hardware capabilities of
 -- an OpenCL device (use `deviceCaps` to get it out of `CLDevice`).
@@ -189,7 +197,7 @@ data CLDeviceCaps = CLDeviceCaps
   , deviceVendorID                              :: Word64
   , deviceVersion                               :: String
   , deviceDriverVersion                         :: String }
-  deriving ( Eq, Ord, Read, Show, Typeable, Generic )
+  deriving ( Eq, Ord, Read, Show, Typeable, Generic, ToJSON, FromJSON )
 
 -- | Managed handle to OpenCL context.
 newtype CLContext = CLContext

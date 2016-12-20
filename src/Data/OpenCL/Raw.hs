@@ -255,6 +255,10 @@ foreign import ccall enqueue_range_kernel
   -> Ptr CEvent
   -> Ptr CEvent
   -> IO Int32
+foreign import ccall get_buffer_size
+  :: CMem
+  -> Ptr CSize
+  -> IO Int32
 
 type CallbackFun = Ptr CChar -> Ptr CChar -> CSize -> Ptr () -> IO ()
 

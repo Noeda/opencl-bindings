@@ -9,13 +9,16 @@ module Data.OpenCL.Buffer
   ( CLMem()
   , MemFlag(..)
   , Block(..)
+  , bufferSize
   , mapBuffer
   , unmapBuffer
   , withMappedBuffer
+  , toStorableVector
   , createBufferRaw
   , createBufferUninitialized
   , createBufferFromBS
-  , createBufferFromVector )
+  , createBufferFromVector
+  , setBufferFromVector )
   where
 
 import Control.Concurrent
@@ -27,13 +30,17 @@ import Data.Bits
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Unsafe as B
 import Data.Data
+import Data.OpenCL.Event
 import Data.OpenCL.Event.Internal
 import Data.OpenCL.Exception
 import Data.OpenCL.Handle
 import Data.OpenCL.Raw
 import qualified Data.Vector.Storable as VS
 import Data.Word
+import Foreign.C.Types
+import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
+import Foreign.Marshal.Utils
 import Foreign.Ptr
 import Foreign.Storable
 import GHC.Generics
@@ -105,6 +112,14 @@ mapBuffer (CLCommandQueue queue_mvar) (CLMem mem_mvar) block map_flags offset sz
   return (castPtr ptr, ev)
  where
   map_bitfield = foldr (.|.) 0 $ fmap mapFlagToBitfield map_flags
+
+bufferSize :: MonadIO m => CLMem -> m Word64
+bufferSize (CLMem mem_mvar) = liftIO $
+  alloca $ \sz_ptr -> do
+    result <- withMVar mem_mvar $ \cmem -> clErrorify $ get_buffer_size cmem sz_ptr
+    touch mem_mvar
+    sz <- peek (sz_ptr :: Ptr CSize)
+    return $ fromIntegral sz
 
 -- | Unmaps a previously mapped buffer.
 unmapBuffer :: MonadIO m
@@ -210,4 +225,28 @@ mapFlagToBitfield :: MapFlag -> Word64
 mapFlagToBitfield MapRead = fromIntegral cl_MAP_READ
 mapFlagToBitfield MapWrite = fromIntegral cl_MAP_WRITE
 mapFlagToBitfield MapWriteInvalidate = fromIntegral cl_MAP_WRITE_INVALIDATE_REGION
+
+toStorableVector :: forall m a. (MonadIO m, MonadMask m, Storable a) => CLCommandQueue -> CLMem -> [CLEvent] -> m (VS.Vector a)
+toStorableVector cqeueue mem events = do
+  sz <- bufferSize mem
+  when (sz `mod` (fromIntegral $ sizeOf (undefined :: a)) /= 0) $
+    error "toStorableVector: mem size is not divisible by item size"
+  (ev, vec) <- withMappedBuffer cqeueue mem Block [MapRead] 0 (fromIntegral sz) events $ \ptr _ -> do
+    bytes <- liftIO $ mallocForeignPtrBytes (fromIntegral sz)
+    liftIO $ withForeignPtr bytes $ \bytes_ptr ->
+      copyBytes bytes_ptr ptr (fromIntegral sz)
+    return $ VS.unsafeFromForeignPtr0 bytes (fromIntegral sz `div` (sizeOf (undefined :: a)))
+  waitEvents [ev]
+  return vec
+
+setBufferFromVector :: forall m a. (MonadIO m, MonadMask m, Storable a) => CLCommandQueue -> CLMem -> [CLEvent] -> VS.Vector a -> m ()
+setBufferFromVector queue mem events new_store = do
+  sz <- bufferSize mem
+  when (fromIntegral sz /= VS.length new_store * sizeOf (undefined :: a)) $
+    error "setBufferFromVector: buffer and vector sizes disagree."
+
+  (ev, _) <- withMappedBuffer queue mem Block [MapWrite] 0 (fromIntegral sz) events $ \ptr _ -> do
+    liftIO $ VS.unsafeWith new_store $ \new_store_ptr ->
+      copyBytes ptr new_store_ptr (fromIntegral sz)
+  waitEvents [ev]
 

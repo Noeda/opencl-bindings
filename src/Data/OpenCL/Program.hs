@@ -1,6 +1,7 @@
 -- | OpenCL programs.
 --
 
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiWayIf #-}
 
 module Data.OpenCL.Program
@@ -22,6 +23,7 @@ import Data.Foldable
 import Data.OpenCL.Exception
 import Data.OpenCL.Handle
 import Data.OpenCL.Raw
+import Data.Monoid
 import Data.Traversable
 import Foreign.Marshal.Alloc
 import Foreign.Marshal.Array
@@ -116,10 +118,11 @@ compileProgram (CLProgram program_var) devices options = liftIO $ mask_ $ do
         log <- getProgramLog program (head devs)
         () <- case result of
           code | code == fromIntegral cl_INVALID_COMPILER_OPTIONS ->
-            throwM $ CLCompilationFailure log
-          code | code == fromIntegral cl_COMPILE_PROGRAM_FAILURE ||
-                 code == fromIntegral cl_BUILD_PROGRAM_FAILURE ->
-            throwM $ CLCompilationFailure log
+            throwM $ CLCompilationFailure $ "CL_INVALID_COMPILER_OPTIONS: " <> log
+          code | code == fromIntegral cl_COMPILE_PROGRAM_FAILURE ->
+            throwM $ CLCompilationFailure $ "CL_COMPILE_PROGRAM_FAILURE: " <> log
+          code | code == fromIntegral cl_BUILD_PROGRAM_FAILURE ->
+            throwM $ CLCompilationFailure $ "CL_BUILD_PROGRAM_FAILURE: " <> log
           code | code /= code_success -> do
             stack <- currentCallStack
             throwM $ CLFailure code stack

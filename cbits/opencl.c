@@ -6,6 +6,8 @@
 #include "CL/cl.h"
 #endif
 
+#include <stdio.h>
+
 #define CONSTANT_FUN(prefix) \
     cl_uint cl_##prefix( void ) \
     { return CL_##prefix; }
@@ -323,7 +325,6 @@ cl_int get_program_build_info( cl_program program
                              , size_t* param_value_size_ret )
 {
     return clGetProgramBuildInfo( program, device, param_name, param_size, param_value, param_value_size_ret );
-
 }
 
 cl_int compile_program( cl_program program
@@ -371,6 +372,22 @@ cl_int create_sub_devices( cl_device_id device
                              , num_devices
                              , out_devices
                              , num_devices_ret );
+}
+
+cl_int get_buffer_size( cl_mem memobj, size_t* output )
+{
+    (*output) = 0;
+    size_t out_size = 0;
+    cl_int result = clGetMemObjectInfo( memobj
+                                      , CL_MEM_SIZE
+                                      , sizeof(size_t)
+                                      , &out_size
+                                      , NULL );
+    if ( result != CL_SUCCESS ) {
+        return result;
+    }
+    (*output) = out_size;
+    return result;
 }
 
 void* enqueue_map_buffer( cl_command_queue queue
