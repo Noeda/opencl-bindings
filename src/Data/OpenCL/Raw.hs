@@ -143,11 +143,12 @@ CONSTANT_FUN(DEVICE_NATIVE_VECTOR_WIDTH_HALF);
 CONSTANT_FUN(DEVICE_HALF_FP_CONFIG);
 
 foreign import ccall unsafe code_success :: Int32
+foreign import ccall unsafe code_platform_not_found :: Int32
 
-foreign import ccall get_num_platforms :: Ptr Word32 -> IO Int32
-foreign import ccall get_platforms :: Word32 -> Ptr CPlatformID -> IO Int32
-foreign import ccall get_platform_info_size :: CPlatformID -> Word32 -> Ptr CSize -> IO Int32
-foreign import ccall get_platform_info :: CPlatformID -> Word32 -> CSize -> Ptr CChar -> IO Int32
+foreign import ccall unsafe get_num_platforms :: Ptr Word32 -> IO Int32
+foreign import ccall unsafe get_platforms :: Word32 -> Ptr CPlatformID -> IO Int32
+foreign import ccall unsafe get_platform_info_size :: CPlatformID -> Word32 -> Ptr CSize -> IO Int32
+foreign import ccall unsafe get_platform_info :: CPlatformID -> Word32 -> CSize -> Ptr CChar -> IO Int32
 foreign import ccall get_num_devices :: CPlatformID -> Ptr Word32 -> IO Int32
 foreign import ccall get_devices :: CPlatformID -> Word32 -> Ptr CDeviceID -> IO Int32
 foreign import ccall get_device_info_size :: CDeviceID -> Word32 -> Ptr CSize -> IO Int32
@@ -259,6 +260,8 @@ foreign import ccall get_buffer_size
   :: CMem
   -> Ptr CSize
   -> IO Int32
+foreign import ccall get_null_platform
+  :: CPlatformID
 
 type CallbackFun = Ptr CChar -> Ptr CChar -> CSize -> Ptr () -> IO ()
 

@@ -1,9 +1,10 @@
+#ifdef __APPLE__
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-#ifdef __APPLE__
 #include "OpenCL/opencl.h"
 #else
 #include "CL/cl.h"
+#include "CL/cl_ext.h"
 #endif
 
 #include <stdio.h>
@@ -148,8 +149,14 @@ cl_int code_success( void )
     return CL_SUCCESS;
 }
 
+cl_int code_platform_not_found( void )
+{
+    return CL_PLATFORM_NOT_FOUND_KHR;
+}
+
 cl_int get_num_platforms( cl_uint* platforms )
 {
+    (*platforms) = 0;
     return clGetPlatformIDs( 0, NULL, platforms );
 }
 
@@ -195,6 +202,11 @@ cl_int get_device_info( cl_device_id device
                           , sz
                           , out
                           , NULL );
+}
+
+cl_platform_id get_null_platform( void )
+{
+    return NULL;
 }
 
 cl_int get_platforms( cl_uint num_platforms, cl_platform_id* platforms )
