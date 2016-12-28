@@ -8,6 +8,7 @@
 module Data.OpenCL.Buffer
   ( CLMem()
   , MemFlag(..)
+  , MapFlag(..)
   , Block(..)
   , bufferSize
   , mapBuffer
